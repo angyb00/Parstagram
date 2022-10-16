@@ -11,39 +11,47 @@ import UIKit
 class LoginViewController: UIViewController {
     @IBOutlet var usernameField: UITextField!
     @IBOutlet var passwordField: UITextField!
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
     }
-    
+
+    override func viewDidAppear(_ animated: Bool) {
+        if UserDefaults.standard.bool(forKey: "userLoggedIn") {
+            performSegue(withIdentifier: "loginSegue", sender: self)
+        }
+    }
+
     @IBAction func onSignIn(_ sender: Any) {
         let username = usernameField.text!
         let password = passwordField.text!
-        
+
         PFUser.logInWithUsername(inBackground: username, password: password) { user, error in
             if user != nil {
                 self.performSegue(withIdentifier: "loginSegue", sender: nil)
+                UserDefaults.standard.set(true, forKey: "userLoggedIn")
             }
             else {
-                print("Error: \(String(describing: error?.localizedDescription))")
+                print("Sign in error: \(String(describing: error?.localizedDescription))")
             }
         }
     }
-    
+
     @IBAction func onSignUp(_ sender: Any) {
         let user = PFUser()
         user.username = usernameField.text
         user.password = passwordField.text
         // user["username"] = usernameField.text
         // user["password"] = passwordField.text
-        
+
         user.signUpInBackground { (success: Bool, error: Error?) in
             if success {
                 self.performSegue(withIdentifier: "loginSegue", sender: nil)
             }
             else {
-                print("Error: \(String(describing: error?.localizedDescription))")
+                print("Sign up error: \(String(describing: error?.localizedDescription))")
             }
         }
     }
